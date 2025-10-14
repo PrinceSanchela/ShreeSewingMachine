@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Firebase Profile</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #1E1E1E;
+            color: #fff;
+            padding: 10px 20px;
+        }
+
+        .profile-btn {
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+            background-color: #333;
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            right: 20px;
+            top: 60px;
+            background-color: #fff;
+            color: #000;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: none;
+            min-width: 150px;
+            z-index: 100;
+        }
+
+        .profile-dropdown p,
+        .profile-dropdown button {
+            padding: 10px;
+            margin: 0;
+        }
+
+        .profile-dropdown button {
+            width: 100%;
+            border: none;
+            background-color: #f44336;
+            color: white;
+            cursor: pointer;
+            border-radius: 0 0 5px 5px;
+        }
+
+        .profile-dropdown button:hover {
+            background-color: #d32f2f;
+        }
+
+        /* Mobile adjustments */
+        @media(max-width: 768px) {
+            .mobile-profile {
+                display: block;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <h1>My App</h1>
+
+        <!-- Desktop Profile -->
+        <div class="user-profile desktop-profile">
+            <div id="desktopProfileBtn" class="profile-btn">👤</div>
+            <div id="desktopProfileDropdown" class="profile-dropdown">
+                <p id="desktopUserEmail">User</p>
+                <button id="desktopLogoutBtn">Logout</button>
+            </div>
+        </div>
+
+        <!-- Mobile Profile -->
+        <div class="user-profile mobile-profile">
+            <div id="mobileProfileBtn" class="profile-btn">👤</div>
+            <div id="mobileProfileDropdown" class="profile-dropdown">
+                <p id="mobileUserEmail">User</p>
+                <button id="mobileLogoutBtn">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <main style="padding: 20px;">
+        <h2 id="welcomeMsg">Welcome!</h2>
+        <p>This is your home page after login.</p>
+    </main>
+
+    <!-- Firebase scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // 🔹 Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDawJavJHcwdqzHHYviEHukvaIkTRjrYv4",
+            authDomain: "shreesewingmachine-bf4e6.firebaseapp.com",
+            projectId: "shreesewingmachine-bf4e6",
+            storageBucket: "shreesewingmachine-bf4e6.firebasestorage.app",
+            messagingSenderId: "1055706324681",
+            appId: "1:1055706324681:web:03eff083e6c124d1f7b718",
+            measurementId: "G-2NCP9KK3V1"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // 🔹 DOM Elements
+        const desktopProfileBtn = document.getElementById('desktopProfileBtn');
+        const desktopProfileDropdown = document.getElementById('desktopProfileDropdown');
+        const desktopUserEmail = document.getElementById('desktopUserEmail');
+        const desktopLogoutBtn = document.getElementById('desktopLogoutBtn');
+
+        const mobileProfileBtn = document.getElementById('mobileProfileBtn');
+        const mobileProfileDropdown = document.getElementById('mobileProfileDropdown');
+        const mobileUserEmail = document.getElementById('mobileUserEmail');
+        const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+
+        const welcomeMsg = document.getElementById('welcomeMsg');
+
+        // 🔹 Toggle dropdowns
+        desktopProfileBtn.addEventListener('click', () => {
+            desktopProfileDropdown.style.display = desktopProfileDropdown.style.display === 'block' ? 'none' : 'block';
+        });
+        mobileProfileBtn.addEventListener('click', () => {
+            mobileProfileDropdown.style.display = mobileProfileDropdown.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Close dropdown when clicking outside
+        window.addEventListener('click', e => {
+            if (!desktopProfileDropdown.contains(e.target) && e.target !== desktopProfileBtn) {
+                desktopProfileDropdown.style.display = 'none';
+            }
+            if (!mobileProfileDropdown.contains(e.target) && e.target !== mobileProfileBtn) {
+                mobileProfileDropdown.style.display = 'none';
+            }
+        });
+
+        // 🔹 Auth state listener
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                let name = 'User';
+                if (!user.isAnonymous) {
+                    db.collection('users').doc(user.uid).get().then(doc => {
+                        if (doc.exists && doc.data().username) name = doc.data().username;
+                        desktopUserEmail.innerText = name;
+                        mobileUserEmail.innerText = name;
+                        welcomeMsg.innerText = `Welcome, ${name}!`;
+                    });
+                } else {
+                    name = 'Guest';
+                    desktopUserEmail.innerText = name;
+                    mobileUserEmail.innerText = name;
+                    welcomeMsg.innerText = `Welcome, ${name}!`;
+                }
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        // 🔹 Logout buttons
+        desktopLogoutBtn.addEventListener('click', () => { auth.signOut(); });
+        mobileLogoutBtn.addEventListener('click', () => { auth.signOut(); });
+    </script>
+
+</body>
+
+</html>
