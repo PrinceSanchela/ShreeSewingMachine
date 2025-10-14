@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shree Sewing Machine - Sales & Repairs</title>
+    <link rel="shortcut icon" href="img/shree_sewing_machine_logo_favicon.png" type="image/x-icon">
+    <link rel="stylesheet" href="style.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Login Page</h1>
+            <div class="switch-btns">
+                <button id="showSignIn" class="switch-btn active">Sign In</button>
+                <button id="showSignUp" class="switch-btn">Sign Up</button>
+            </div>
+
+            <!-- Sign In Form -->
+            <div id="signinForm" class="form-container">
+                <input type="email" id="signinEmail" placeholder="Email" required>
+                <span id="signinEmailFeedback" class="feedback"></span>
+                <div class="password-wrapper">
+                    <input type="password" id="signinPassword" placeholder="Password" required>
+                    <span class="toggle-password" onclick="togglePassword('signinPassword')">Show</span>
+                </div>
+                <button onclick="signin()" class="form-btn">Sign In</button>
+                <button id="googleSignInBtn" class="form-btn google-btn">Sign In with Google</button>
+                <button id="guestBtn" class="form-btn guest-btn">Continue as Guest</button>
+            </div>
+
+            <!-- Sign Up Form -->
+            <div id="signupForm" class="form-container" style="display:none;">
+                <input type="email" id="signupEmail" placeholder="Email" required>
+                <span id="signupEmailFeedback" class="feedback"></span>
+                <div class="password-wrapper">
+                    <input type="password" id="signupPassword" placeholder="Password" required>
+                    <span class="toggle-password" onclick="togglePassword('signupPassword')">Show</span>
+                </div>
+                <span id="signupPasswordFeedback" class="feedback"></span>
+                <div class="password-strength">
+                    <div id="strengthBar"></div>
+                </div>
+                <button onclick="signup()" class="form-btn">Sign Up</button>
+                <button id="googleSignUpBtn" class="form-btn google-btn">Sign Up with Google</button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
