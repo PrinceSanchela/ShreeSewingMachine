@@ -935,15 +935,20 @@
                 authBtnD.textContent = "Logout";
                 authBtnD.onclick = () => {
                     auth.signOut().then(() => {
-                        window.location.href = "login.html";
+                        window.location.href = "/login.html";
                     });
                 };
             } else {
                 // User not logged in
                 authBtnD.textContent = "Login";
-                authBtnD.onclick = () => {
-                    window.location.href = "login.html";
-                };
+                setTimeout(() => {
+                    authBtnD.onclick = () => {
+                        window.location.href = "/login.html";
+                    };
+                    if (!auth.currentUser) {
+                        window.location.href = "/login.html";
+                    }
+                }, 800);
             }
         });
         // Logout
