@@ -7,6 +7,8 @@
     <title>Shree Sewing Machine - Sales & Repairs</title>
     <link rel="shortcut icon" href="img/shree_sewing_machine_logo_favicon.png" type="image/x-icon">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
@@ -15,6 +17,7 @@
             font-family: 'Poppins', sans-serif;
             scroll-behavior: smooth;
         }
+
 
         .hero_section.show .hero_img {
             opacity: 1;
@@ -111,6 +114,51 @@
         .nav-link:hover::after {
             width: 100%;
         }
+
+        .user-profile {
+            position: relative;
+        }
+
+        .profile-btn {
+            cursor: pointer;
+            font-size: 24px;
+            background: none;
+            border: none;
+            color: white;
+        }
+
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 40px;
+            background: white;
+            color: #333;
+            width: 200px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            padding: 15px;
+        }
+
+        .profile-dropdown p {
+            margin: 0 0 10px 0;
+            font-weight: bold;
+        }
+
+        .profile-dropdown button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            background: #ff4757;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .profile-dropdown button:hover {
+            background: #e84118;
+        }
     </style>
 </head>
 
@@ -146,6 +194,13 @@
                     <button id="mobile-menu-button" class="text-gray-700 hover:text-gray-900">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
+                </div>
+                <div class="user-profile">
+                    <div id="profileBtn" class="profile-btn">👤</div>
+                    <div id="profileDropdown" class="profile-dropdown">
+                        <p id="userEmail">User</p>
+                        <button id="logoutBtn">Logout</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -780,8 +835,58 @@
             </div>
         </div>
     </footer>
-
     <script>
+        // Firebase config (replace with your config)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDawJavJHcwdqzHHYviEHukvaIkTRjrYv4",
+            authDomain: "shreesewingmachine-bf4e6.firebaseapp.com",
+            projectId: "shreesewingmachine-bf4e6",
+            storageBucket: "shreesewingmachine-bf4e6.firebasestorage.app",
+            messagingSenderId: "1055706324681",
+            appId: "1:1055706324681:web:03eff083e6c124d1f7b718",
+            measurementId: "G-2NCP9KK3V1"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // DOM elements
+        const profileBtn = document.getElementById('profileBtn');
+        const profileDropdown = document.getElementById('profileDropdown');
+        const userEmail = document.getElementById('userEmail');
+        const welcomeMsg = document.getElementById('welcomeMsg');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        // Toggle dropdown
+        profileBtn.addEventListener('click', () => {
+            profileDropdown.style.display = profileDropdown.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Hide dropdown if clicked outside
+        window.addEventListener('click', e => {
+            if (!profileDropdown.contains(e.target) && e.target !== profileBtn) {
+                profileDropdown.style.display = 'none';
+            }
+        });
+
+        // Check auth state
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                const email = user.isAnonymous ? 'Guest' : user.email;
+                userEmail.innerText = email;
+                welcomeMsg.innerText = `Welcome, ${email}!`;
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', () => {
+            auth.signOut().then(() => window.location.href = 'index.html');
+        });
+
+
+
         // Mobile menu toggle
         document.getElementById('mobile-menu-button').addEventListener('click', function () {
             const menu = document.getElementById('mobile-menu');
