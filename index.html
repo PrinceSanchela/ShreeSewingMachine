@@ -858,200 +858,184 @@
         </div>
     </footer>
     <script>
-        // Firebase config (replace with your config)
-        const firebaseConfig = {
-            apiKey: "AIzaSyDawJavJHcwdqzHHYviEHukvaIkTRjrYv4",
-            authDomain: "shreesewingmachine-bf4e6.firebaseapp.com",
-            projectId: "shreesewingmachine-bf4e6",
-            storageBucket: "shreesewingmachine-bf4e6.firebasestorage.app",
-            messagingSenderId: "1055706324681",
-            appId: "1:1055706324681:web:03eff083e6c124d1f7b718",
-            measurementId: "G-2NCP9KK3V1"
-        };
-        const app = firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+        // ===============================
+        // 🔥 Firebase Initialization
+        // ===============================
+        document.addEventListener("DOMContentLoaded", () => {
+            const firebaseConfig = {
+                apiKey: "AIzaSyDawJavJHcwdqzHHYviEHukvaIkTRjrYv4",
+                authDomain: "shreesewingmachine-bf4e6.firebaseapp.com",
+                projectId: "shreesewingmachine-bf4e6",
+                storageBucket: "shreesewingmachine-bf4e6.firebasestorage.app",
+                messagingSenderId: "1055706324681",
+                appId: "1:1055706324681:web:03eff083e6c124d1f7b718",
+                measurementId: "G-2NCP9KK3V1"
+            };
+            firebase.initializeApp(firebaseConfig);
+            const auth = firebase.auth();
+            const db = firebase.firestore();
 
-        // DOM elements
-        const profileD = document.getElementById('profileD');
-        const profileBtnD = document.getElementById('profileBtnD');
-        const profileBtnM = document.getElementById('profileBtnM');
-        const userEmail = document.getElementById('userEmail');
-        const welcomeMsg = document.getElementById('welcomeMsg');
-        const profileDropdown = document.getElementById('profileDropdown');
-        const profileArrow = document.getElementById('profileArrow');
-        const profileName = document.getElementById('profileName');
-        const profileEmail = document.getElementById('profileEmail');
-        const authBtnD = document.getElementById('authBtnD');
-        const authBtnM = document.getElementById('authBtnM');
+            // ===============================
+            // 🌟 DOM Elements
+            // ===============================
+            const profileD = document.getElementById('profileD');
+            const profileBtnD = document.getElementById('profileBtnD');
+            const profileBtnM = document.getElementById('profileBtnM');
+            const userEmail = document.getElementById('userEmail');
+            const welcomeMsg = document.getElementById('welcomeMsg');
+            const profileDropdown = document.getElementById('profileDropdown');
+            const profileName = document.getElementById('profileName');
+            const profileEmail = document.getElementById('profileEmail');
+            const authBtnD = document.getElementById('authBtnD');
+            const authBtnM = document.getElementById('authBtnM');
+            const loginBtn = document.getElementById('loginBtn');
+            const signupBtn = document.getElementById('signupBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const profileIcon = document.getElementById('profileIcon');
 
-        // Toggle dropdown
-        profileD.addEventListener('click', () => {
-            profileDropdown.classList.toggle('show');
-        });
+            // ===============================
+            // ⚙️ Helper Functions
+            // ===============================
 
-        // Close dropdown on outside click
-        window.addEventListener('click', (event) => {
-            if (!profileD.contains(event.target) && !profileDropdown.contains(event.target)) {
-                profileDropdown.classList.remove('show');
+            // Toggle dropdown
+            if (profileD && profileDropdown) {
+                profileD.addEventListener('click', () => {
+                    profileDropdown.classList.toggle('show');
+                });
+                window.addEventListener('click', (event) => {
+                    if (!profileD.contains(event.target) && !profileDropdown.contains(event.target)) {
+                        profileDropdown.classList.remove('show');
+                    }
+                });
             }
-        });
 
-        // Auth state listener
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                // Get email from Firebase Auth
-                const email = user.email || "Guest";
+            // ===============================
+            // 🕒 Auth Initialization Delay
+            // ===============================
+            let authInitialized = false;
+            const loadingMsg = document.createElement("p");
+            loadingMsg.textContent = "Checking login status...";
+            loadingMsg.style.textAlign = "center";
+            loadingMsg.style.marginTop = "1rem";
+            document.body.prepend(loadingMsg);
 
-                // Set email in dropdown
-                profileEmail.textContent = email;
+            auth.onAuthStateChanged(async (user) => {
+                if (!authInitialized) {
+                    authInitialized = true;
+                    loadingMsg.remove();
+                }
 
-                // Try fetching username from Firestore
-                db.collection('users').doc(user.uid).get()
-                    .then(doc => {
-                        let displayName = "User"; // default
-                        if (doc.exists && doc.data().username) {
-                            displayName = doc.data().username;
+                if (user) {
+                    // ✅ Logged in
+                    const email = user.email || "Guest";
+                    profileEmail.textContent = email;
+
+                    // Fetch username from Firestore
+                    try {
+                        const docSnap = await db.collection('users').doc(user.uid).get();
+                        let displayName = "User";
+                        if (docSnap.exists && docSnap.data().username) {
+                            displayName = docSnap.data().username;
                         } else if (user.displayName) {
-                            displayName = user.displayName; // fallback if user has displayName in auth
+                            displayName = user.displayName;
                         }
                         profileName.textContent = displayName;
                         welcomeMsg.textContent = `Welcome, ${displayName}!`;
-                    })
-                    .catch(err => {
+                    } catch (err) {
                         console.error("Error fetching username:", err);
                         profileName.textContent = "User";
                         welcomeMsg.textContent = "Welcome, User!";
-                    });
-
-            } else {
-                window.location.href = 'index.html';
-            }
-        });
-
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                // User is logged in
-                authBtnD.textContent = "Logout";
-                authBtnD.onclick = () => {
-                    auth.signOut().then(() => {
-                        window.location.href = "/login.html";
-                    });
-                };
-            } else {
-                // User not logged in
-                authBtnD.textContent = "Login";
-                setTimeout(() => {
-                    authBtnD.onclick = () => {
-                        window.location.href = "/login.html";
-                    };
-                    if (!auth.currentUser) {
-                        window.location.href = "/login.html";
                     }
-                }, 800);
-            }
-        });
-        // Logout
-        logoutBtn.addEventListener('click', () => {
-            auth.signOut();
-            profileDropdown.classList.remove('show');
-        });
 
+                    // Change button to Logout
+                    authBtnD.textContent = "Logout";
+                    authBtnD.onclick = () => {
+                        auth.signOut().then(window.location.href = "login.html");
+                    };
 
-        // Update UI based on user state
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                // Hide login/signup buttons
-                document.getElementById('loginBtn').style.display = 'none';
-                document.getElementById('signupBtn').style.display = 'none';
+                    if (loginBtn && signupBtn) {
+                        loginBtn.style.display = "none";
+                        signupBtn.style.display = "none";
+                    }
 
-                // Update profile name
-                if (user.isAnonymous) {
-                    profileName.textContent = "Guest";
-                    profileIcon.src = "https://img.icons8.com/ios-filled/50/000000/user-male-circle.png";
+                    if (profileIcon) {
+                        profileIcon.src = user.photoURL || "https://img.icons8.com/color/48/000000/user.png";
+                    }
+
                 } else {
-                    profileName.textContent = user.email || "User";
-                    profileIcon.src = "https://img.icons8.com/color/48/000000/user.png"; // change if you have avatar
+                    // 🚫 Not logged in
+                    console.log("User not logged in");
+                    authBtnD.textContent = "Login";
+                    authBtnD.onclick = window.location.href = "login.html";
+
+                    if (loginBtn && signupBtn) {
+                        loginBtn.style.display = "inline-block";
+                        signupBtn.style.display = "inline-block";
+                    }
+
+                    // Don't instantly redirect — just show Login button
                 }
-            } else {
-                // Show login/signup buttons
-                document.getElementById('loginBtn').style.display = 'inline-block';
-                document.getElementById('signupBtn').style.display = 'inline-block';
+            });
 
-                // Reset profile
-                profileName.textContent = "Guest";
-                profileIcon.src = "https://img.icons8.com/ios-filled/50/000000/user-male-circle.png";
-            }
-        });
-
-
-
-
-
-
-
-        // Toggle dropdown
-        // profileBtn.addEventListener('click', () => {
-        //     profileDropdown.style.display = profileDropdown.style.display === 'block' ? 'none' : 'block';
-        // });
-
-        // Hide dropdown if clicked outside
-        // window.addEventListener('click', e => {
-        //     if (!profileDropdown.contains(e.target) && e.target !== profileBtn) {
-        //         profileDropdown.style.display = 'none';
-        //     }
-        // });
-
-        // Check auth state
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                const email = user.isAnonymous ? 'Guest' : user.email;
-                userEmail.innerText = email;
-                welcomeMsg.innerText = `Welcome, ${email}!`;
-            } else {
-                window.location.href = 'index.html';
-            }
-        });
-
-        // Mobile menu toggle
-        document.getElementById('mobile-menu-button').addEventListener('click', function () {
-            const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
-        });
-
-        // Smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const targetId = this.getAttribute('href');
-                if (targetId === '#') return;
-
-                const targetElement = document.querySelector(targetId);
-                if (targetElement) {
-                    window.scrollTo({
-                        top: targetElement.offsetTop - 80,
-                        behavior: 'smooth'
+            // ===============================
+            // 🚪 Logout
+            // ===============================
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                    auth.signOut().then(() => {
+                        profileDropdown.classList.remove('show');
+                        window.location.href = "login.html";
                     });
+                });
+            }
 
-                    // Close mobile menu if open
-                    const mobileMenu = document.getElementById('mobile-menu');
-                    if (!mobileMenu.classList.contains('hidden')) {
+            // ===============================
+            // 📱 Mobile Menu Toggle
+            // ===============================
+            const mobileMenuBtn = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenuBtn && mobileMenu) {
+                mobileMenuBtn.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+
+            // ===============================
+            // 🧭 Smooth Scrolling
+            // ===============================
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = anchor.getAttribute('href');
+                    if (targetId && targetId !== '#') {
+                        const target = document.querySelector(targetId);
+                        if (target) {
+                            window.scrollTo({
+                                top: target.offsetTop - 80,
+                                behavior: 'smooth'
+                            });
+                        }
+                    }
+                    if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
                         mobileMenu.classList.add('hidden');
                     }
-                }
+                });
             });
-        });
 
-        // Form submission
-        const contactForm = document.querySelector('form');
-        if (contactForm) {
-            contactForm.addEventListener('submit', function (e) {
-                e.preventDefault();
-                alert('Thank you for your message! We will get back to you soon.');
-                this.reset();
-            });
-        }
+            // ===============================
+            // ✉️ Contact Form
+            // ===============================
+            const contactForm = document.querySelector('form');
+            if (contactForm) {
+                contactForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    alert('Thank you for your message! We will get back to you soon.');
+                    contactForm.reset();
+                });
+            }
+        });
     </script>
+
 </body>
 
 </html>
